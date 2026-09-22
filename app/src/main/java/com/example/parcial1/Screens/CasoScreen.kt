@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.parcial1.Database.CasoEntity
 import com.example.parcial1.Logic.CasoLogic
-
+//A
 @Composable
 fun CasoScreen(
     casoLogic: CasoLogic,

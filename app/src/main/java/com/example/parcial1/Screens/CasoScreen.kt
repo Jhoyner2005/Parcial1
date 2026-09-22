@@ -7,107 +7,159 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.parcial1.Database.CasoEntity
 import com.example.parcial1.Logic.CasoLogic
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CasoScreen(casoLogic: CasoLogic) {
+fun CasoScreen(
+    casoLogic: CasoLogic,
+    onEditarCaso: (CasoEntity) -> Unit
+) {
+
     val listaCasos by casoLogic.todosLosCasos.collectAsState()
 
-    var titulo by remember { mutableStateOf("") }
-    var descripcion by remember { mutableStateOf("") }
-    var estado by remember { mutableStateOf("") }
-    var conclusion by remember { mutableStateOf("") }
+    var textoBusqueda by remember {
+        mutableStateOf("")
+    }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Gestión de Casos") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+    val casosFiltrados = listaCasos.filter { caso ->
+
+        caso.titulo.contains(
+            textoBusqueda,
+            ignoreCase = true
+        ) ||
+                caso.descripcion.contains(
+                    textoBusqueda,
+                    ignoreCase = true
+                ) ||
+                caso.estado.contains(
+                    textoBusqueda,
+                    ignoreCase = true
                 )
-            )
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+
+        Text(
+            text = "Gestión de Casos",
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
+
+        OutlinedTextField(
+            value = textoBusqueda,
+            onValueChange = {
+                textoBusqueda = it
+            },
+            label = {
+                Text("Buscar caso")
+            },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
+
+        Text(
+            text = "Casos registrados: ${casosFiltrados.size}",
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            OutlinedTextField(
-                value = titulo,
-                onValueChange = { titulo = it },
-                label = { Text("Título del caso") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
-                value = descripcion,
-                onValueChange = { descripcion = it },
-                label = { Text("Descripción") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
-                value = estado,
-                onValueChange = { estado = it },
-                label = { Text("Estado") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
-                value = conclusion,
-                onValueChange = { conclusion = it },
-                label = { Text("Conclusión") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(12.dp))
 
-            Button(
-                onClick = {
-                    if (titulo.isNotBlank()) {
-                        casoLogic.insertarCaso(
-                            titulo = titulo,
-                            descripcion = descripcion,
-                            fecha = "2026-09-20",
-                            estado = estado,
-                            conclusion = conclusion
-                        )
-                        // Limpiar campos después de guardar
-                        titulo = ""
-                        descripcion = ""
-                        estado = ""
-                        conclusion = ""
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Guardar Caso")
-            }
+            items(casosFiltrados) { caso ->
 
-            Spacer(modifier = Modifier.height(16.dp))
-            HorizontalDivider()
-            Spacer(modifier = Modifier.height(16.dp))
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = 2.dp
+                    )
+                ) {
 
-            Text("Lista de Casos Guardados", style = MaterialTheme.typography.titleMedium)
-            Spacer(modifier = Modifier.height(8.dp))
-
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(listaCasos) { caso ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    Column(
+                        modifier = Modifier.padding(16.dp)
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(text = "Título: ${caso.titulo}", style = MaterialTheme.typography.titleSmall)
-                            Text(text = "Descripción: ${caso.descripcion}")
-                            Text(text = "Estado: ${caso.estado}")
-                            Text(text = "Conclusión: ${caso.conclusion}")
+
+                        Text(
+                            text = caso.titulo,
+                            style = MaterialTheme.typography.titleLarge
+                        )
+
+                        Spacer(
+                            modifier = Modifier.height(6.dp)
+                        )
+
+                        Text(
+                            text = "Fecha: ${caso.fecha}"
+                        )
+
+                        Text(
+                            text = "Estado: ${caso.estado}"
+                        )
+
+                        Spacer(
+                            modifier = Modifier.height(6.dp)
+                        )
+
+                        Text(
+                            text = caso.descripcion
+                        )
+
+                        if (caso.conclusion.isNotBlank()) {
+
+                            Spacer(
+                                modifier = Modifier.height(6.dp)
+                            )
+
+                            Text(
+                                text = "Conclusión: ${caso.conclusion}"
+                            )
+                        }
+
+                        Spacer(
+                            modifier = Modifier.height(12.dp)
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+
+                            OutlinedButton(
+                                onClick = {
+                                    // Lo conectaremos en el siguiente paso
+                                }
+                            ) {
+                                Text("Editar")
+                            }
+
+                            Spacer(
+                                modifier = Modifier.width(8.dp)
+                            )
+
+                            Button(
+                                onClick = {
+                                    casoLogic.eliminarCaso(caso)
+                                }
+                            ) {
+                                Text("Eliminar")
+                            }
                         }
                     }
                 }

@@ -20,6 +20,7 @@ class CasoLogic(application: Application) : AndroidViewModel(application) {
     init {
         val casoDao = AppDatabase.getDatabase(application).casoDao()
         repository = CasoRepository(casoDao)
+
         todosLosCasos = repository.todosLosCasos
             .stateIn(
                 scope = viewModelScope,
@@ -28,7 +29,13 @@ class CasoLogic(application: Application) : AndroidViewModel(application) {
             )
     }
 
-    fun insertarCaso(titulo: String, descripcion: String, fecha: String, estado: String, conclusion: String) {
+    fun insertarCaso(
+        titulo: String,
+        descripcion: String,
+        fecha: String,
+        estado: String,
+        conclusion: String
+    ) {
         viewModelScope.launch {
             val caso = CasoEntity(
                 titulo = titulo,
@@ -37,7 +44,33 @@ class CasoLogic(application: Application) : AndroidViewModel(application) {
                 estado = estado,
                 conclusion = conclusion
             )
+
             repository.insertarCaso(caso)
         }
+    }
+
+    fun actualizarCaso(caso: CasoEntity) {
+        viewModelScope.launch {
+            repository.actualizarCaso(caso)
+        }
+    }
+
+    fun eliminarCaso(caso: CasoEntity) {
+        viewModelScope.launch {
+            repository.eliminarCaso(caso)
+        }
+    }
+
+    suspend fun obtenerCasoPorId(id: Int): CasoEntity? {
+        return repository.obtenerCasoPorId(id)
+    }
+
+    fun buscarCasos(texto: String): StateFlow<List<CasoEntity>> {
+        return repository.buscarCasos(texto)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
     }
 }

@@ -227,18 +227,16 @@ class MainActivity : ComponentActivity() {
                                                         conclusion = conclusion
                                                     )
 
-                                                casoLogic.actualizarCaso(
-                                                    casoActualizado
-                                                )
+                                                casoLogic.actualizarCaso(casoActualizado)
+
+                                                casoSeleccionado = casoActualizado
                                             }
 
                                             pantallaActual = "detalle"
-                                            casoSeleccionado = null
                                         },
 
                                         onCancelar = {
                                             pantallaActual = "detalle"
-                                            casoSeleccionado = null
                                         }
                                     )
                                 }

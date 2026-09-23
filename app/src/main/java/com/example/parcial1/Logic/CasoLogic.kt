@@ -5,7 +5,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.parcial1.Database.AppDatabase
 import com.example.parcial1.Database.CasoEntity
+import com.example.parcial1.Database.EntrevistaEntity
 import com.example.parcial1.Repository.CasoRepository
+import com.example.parcial1.Repository.EntrevistaRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -14,12 +16,15 @@ import kotlinx.coroutines.launch
 class CasoLogic(application: Application) : AndroidViewModel(application) {
 
     private val repository: CasoRepository
+    private val entrevistaRepository: EntrevistaRepository
 
     val todosLosCasos: StateFlow<List<CasoEntity>>
 
     init {
-        val casoDao = AppDatabase.getDatabase(application).casoDao()
-        repository = CasoRepository(casoDao)
+        val database = AppDatabase.getDatabase(application)
+
+        repository = CasoRepository(database.casoDao())
+        entrevistaRepository = EntrevistaRepository(database.entrevistaDao())
 
         todosLosCasos = repository.todosLosCasos
             .stateIn(
@@ -28,6 +33,8 @@ class CasoLogic(application: Application) : AndroidViewModel(application) {
                 initialValue = emptyList()
             )
     }
+
+    // ==================== CASOS ====================
 
     fun insertarCaso(
         titulo: String,
@@ -44,7 +51,6 @@ class CasoLogic(application: Application) : AndroidViewModel(application) {
                 estado = estado,
                 conclusion = conclusion
             )
-
             repository.insertarCaso(caso)
         }
     }
@@ -72,5 +78,45 @@ class CasoLogic(application: Application) : AndroidViewModel(application) {
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = emptyList()
             )
+    }
+
+    // ==================== ENTREVISTAS ====================
+
+    fun obtenerEntrevistasPorCaso(casoId: Int): StateFlow<List<EntrevistaEntity>> {
+        return entrevistaRepository.obtenerEntrevistasPorCaso(casoId)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
+    }
+
+    fun insertarEntrevista(
+        casoId: Int,
+        entrevistado: String,
+        fecha: String,
+        hallazgos: String
+    ) {
+        viewModelScope.launch {
+            val entrevista = EntrevistaEntity(
+                casoId = casoId,
+                entrevistado = entrevistado,
+                fecha = fecha,
+                hallazgos = hallazgos
+            )
+            entrevistaRepository.insertarEntrevista(entrevista)
+        }
+    }
+
+    fun actualizarEntrevista(entrevista: EntrevistaEntity) {
+        viewModelScope.launch {
+            entrevistaRepository.actualizarEntrevista(entrevista)
+        }
+    }
+
+    fun eliminarEntrevista(entrevista: EntrevistaEntity) {
+        viewModelScope.launch {
+            entrevistaRepository.eliminarEntrevista(entrevista)
+        }
     }
 }

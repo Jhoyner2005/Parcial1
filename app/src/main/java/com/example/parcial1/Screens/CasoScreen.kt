@@ -1,5 +1,6 @@
 package com.example.parcial1.Screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,7 +14,8 @@ import com.example.parcial1.Logic.CasoLogic
 @Composable
 fun CasoScreen(
     casoLogic: CasoLogic,
-    onEditarCaso: (CasoEntity) -> Unit
+    onEditarCaso: (CasoEntity) -> Unit,
+    onVerDetalle: (CasoEntity) -> Unit
 ) {
 
     val listaCasos by casoLogic.todosLosCasos.collectAsState()
@@ -86,7 +88,8 @@ fun CasoScreen(
             items(casosFiltrados) { caso ->
 
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth()
+                        .clickable{ onVerDetalle(caso) },
                     elevation = CardDefaults.cardElevation(
                         defaultElevation = 2.dp
                     )

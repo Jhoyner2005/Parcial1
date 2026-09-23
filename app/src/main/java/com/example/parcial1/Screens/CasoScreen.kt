@@ -143,7 +143,7 @@ fun CasoScreen(
 
                             OutlinedButton(
                                 onClick = {
-                                    // Lo conectaremos en el siguiente paso
+                                    onEditarCaso(caso)
                                 }
                             ) {
                                 Text("Editar")

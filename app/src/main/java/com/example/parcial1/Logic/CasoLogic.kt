@@ -3,7 +3,6 @@ package com.example.parcial1.Logic
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.parcial1.Database.AppDatabase
 import com.example.parcial1.Database.CasoEntity
 import com.example.parcial1.Database.EntrevistaEntity
 import com.example.parcial1.Repository.CasoRepository
@@ -13,26 +12,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class CasoLogic(application: Application) : AndroidViewModel(application) {
-
-    private val repository: CasoRepository
+class CasoLogic(
+    application: Application,
+    private val repository: CasoRepository,
     private val entrevistaRepository: EntrevistaRepository
+) : AndroidViewModel(application) {
 
-    val todosLosCasos: StateFlow<List<CasoEntity>>
-
-    init {
-        val database = AppDatabase.getDatabase(application)
-
-        repository = CasoRepository(database.casoDao())
-        entrevistaRepository = EntrevistaRepository(database.entrevistaDao())
-
-        todosLosCasos = repository.todosLosCasos
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = emptyList()
-            )
-    }
+    val todosLosCasos: StateFlow<List<CasoEntity>> = repository.todosLosCasos
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     // ==================== CASOS ====================
 
@@ -44,14 +35,15 @@ class CasoLogic(application: Application) : AndroidViewModel(application) {
         conclusion: String
     ) {
         viewModelScope.launch {
-            val caso = CasoEntity(
-                titulo = titulo,
-                descripcion = descripcion,
-                fecha = fecha,
-                estado = estado,
-                conclusion = conclusion
+            repository.insertarCaso(
+                CasoEntity(
+                    titulo = titulo,
+                    descripcion = descripcion,
+                    fecha = fecha,
+                    estado = estado,
+                    conclusion = conclusion
+                )
             )
-            repository.insertarCaso(caso)
         }
     }
 
@@ -99,14 +91,15 @@ class CasoLogic(application: Application) : AndroidViewModel(application) {
         evidencias: String
     ) {
         viewModelScope.launch {
-            val entrevista = EntrevistaEntity(
-                casoId = casoId,
-                entrevistado = entrevistado,
-                fecha = fecha,
-                hallazgos = hallazgos,
-                evidencias = evidencias
+            entrevistaRepository.insertarEntrevista(
+                EntrevistaEntity(
+                    casoId = casoId,
+                    entrevistado = entrevistado,
+                    fecha = fecha,
+                    hallazgos = hallazgos,
+                    evidencias = evidencias
+                )
             )
-            entrevistaRepository.insertarEntrevista(entrevista)
         }
     }
 

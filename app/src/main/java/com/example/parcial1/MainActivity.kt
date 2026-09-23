@@ -23,10 +23,27 @@ import com.example.parcial1.Screens.FormularioCasoScreen
 import com.example.parcial1.Screens.FormularioEntrevistaScreen
 import com.example.parcial1.Screens.InicioScreen
 import com.example.parcial1.ui.theme.Parcial1Theme
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.example.parcial1.Database.AppDatabase
+import com.example.parcial1.Repository.CasoRepository
+import com.example.parcial1.Repository.EntrevistaRepository
 
 class MainActivity : ComponentActivity() {
 
-    private val casoLogic: CasoLogic by viewModels()
+    private val casoLogic: CasoLogic by viewModels {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val db = AppDatabase.getDatabase(applicationContext)
+                @Suppress("UNCHECKED_CAST")
+                return CasoLogic(
+                    application = application,
+                    repository = CasoRepository(db.casoDao()),
+                    entrevistaRepository = EntrevistaRepository(db.entrevistaDao())
+                ) as T
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

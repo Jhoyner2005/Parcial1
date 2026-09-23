@@ -8,6 +8,84 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.parcial1.Database.CasoEntity
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
+
+
+class FechaVisualTransformation : VisualTransformation {
+
+    override fun filter(text: AnnotatedString): TransformedText {
+
+        val numeros = text.text
+
+        val fecha = when {
+            numeros.length <= 2 -> numeros
+
+            numeros.length <= 4 ->
+                "${numeros.substring(0, 2)}/${numeros.substring(2)}"
+
+            else ->
+                "${numeros.substring(0, 2)}/" +
+                        "${numeros.substring(2, 4)}/" +
+                        numeros.substring(4)
+        }
+
+        val offsetMapping = object : OffsetMapping {
+
+            override fun originalToTransformed(offset: Int): Int {
+                return when {
+                    offset <= 2 -> offset
+                    offset <= 4 -> offset + 1
+                    else -> offset + 2
+                }
+            }
+
+            override fun transformedToOriginal(offset: Int): Int {
+                return when {
+                    offset <= 2 -> offset
+                    offset <= 5 -> offset - 1
+                    else -> offset - 2
+                }
+            }
+        }
+
+        return TransformedText(
+            AnnotatedString(fecha),
+            offsetMapping
+        )
+    }
+}
+
+fun formatearFecha(fecha: String): String {
+    val numeros = fecha.filter { it.isDigit() }.take(6)
+
+    return when {
+        numeros.length <= 2 -> numeros
+        numeros.length <= 4 ->
+            "${numeros.substring(0, 2)}/${numeros.substring(2)}"
+        else ->
+            "${numeros.substring(0, 2)}/" +
+                    "${numeros.substring(2, 4)}/" +
+                    numeros.substring(4)
+    }
+}
+
+fun fechaValida(fecha: String): Boolean {
+    if (fecha.length != 6) return false
+
+    val dia = fecha.substring(0, 2).toInt()
+    val mes = fecha.substring(2, 4).toInt()
+
+    return dia in 1..31 && mes in 1..12
+}
+
+
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,13 +157,24 @@ fun FormularioCasoScreen(
 
             Spacer(modifier = Modifier.height(10.dp))
 
+
+
             OutlinedTextField(
                 value = fecha,
-                onValueChange = { fecha = it },
+                onValueChange = { nuevoTexto ->
+                    fecha = nuevoTexto.filter { it.isDigit() }.take(6)
+                },
                 label = { Text("Fecha") },
+                placeholder = { Text("DD/MM/AA") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
+                ),
+                visualTransformation = FechaVisualTransformation()
             )
+
+
 
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -111,7 +200,7 @@ fun FormularioCasoScreen(
 
             Button(
                 onClick = {
-                    if (titulo.isNotBlank()) {
+                    if (titulo.isNotBlank() && fechaValida(fecha)) {
                         onGuardar(
                             titulo,
                             descripcion,

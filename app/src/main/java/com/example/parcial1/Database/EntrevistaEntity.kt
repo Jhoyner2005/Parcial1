@@ -24,5 +24,6 @@ data class EntrevistaEntity(
     val casoId: Int,
     val entrevistado: String,
     val fecha: String,
-    val hallazgos: String
+    val hallazgos: String,
+    val evidencias: String = ""
 )

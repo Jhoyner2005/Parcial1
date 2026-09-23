@@ -16,6 +16,17 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 
 
+enum class EstadoCaso(val label: String) {
+    EN_INVESTIGACION("En investigación"),
+    PUBLICADO("Publicado"),
+    CERRADO("Cerrado"),
+    EN_EDICION("En edición");
+
+    companion object {
+        fun fromLabel(label: String): EstadoCaso =
+            entries.find { it.label == label } ?: EN_INVESTIGACION
+    }
+}
 class FechaVisualTransformation : VisualTransformation {
 
     override fun filter(text: AnnotatedString): TransformedText {
@@ -104,8 +115,17 @@ fun FormularioCasoScreen(
     var titulo by remember { mutableStateOf(caso?.titulo ?: "") }
     var descripcion by remember { mutableStateOf(caso?.descripcion ?: "") }
     var fecha by remember { mutableStateOf(caso?.fecha ?: "") }
-    var estado by remember { mutableStateOf(caso?.estado ?: "") }
     var conclusion by remember { mutableStateOf(caso?.conclusion ?: "") }
+
+    var estadoExpandido by remember { mutableStateOf(false) }
+
+    var estado by remember {
+        mutableStateOf(
+            caso?.estado
+                ?.let { EstadoCaso.fromLabel(it) }
+                ?: EstadoCaso.EN_INVESTIGACION
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -178,13 +198,43 @@ fun FormularioCasoScreen(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            OutlinedTextField(
-                value = estado,
-                onValueChange = { estado = it },
-                label = { Text("Estado") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
+            ExposedDropdownMenuBox(
+                expanded = estadoExpandido,
+                onExpandedChange = {
+                    estadoExpandido = !estadoExpandido
+                }
+            ) {
+                OutlinedTextField(
+                    value = estado.label,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Estado") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(
+                            expanded = estadoExpandido
+                        )
+                    },
+                    singleLine = true
+                )
+
+                ExposedDropdownMenu(
+                    expanded = estadoExpandido,
+                    onDismissRequest = { estadoExpandido = false }
+                ) {
+                    EstadoCaso.entries.forEach { opcion ->
+                        DropdownMenuItem(
+                            text = { Text(opcion.label) },
+                            onClick = {
+                                estado = opcion
+                                estadoExpandido = false
+                            }
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -205,7 +255,7 @@ fun FormularioCasoScreen(
                             titulo,
                             descripcion,
                             fecha,
-                            estado,
+                            estado.label,
                             conclusion
                         )
                     }

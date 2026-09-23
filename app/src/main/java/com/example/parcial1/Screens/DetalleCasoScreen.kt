@@ -140,7 +140,19 @@ fun DetalleCasoScreen(
                             Text(text = "Hallazgos:")
                             Text(text = entrevista.hallazgos)
 
+                            if (entrevista.evidencias.isNotBlank()) {
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(text = "Evidencias:")
+                                Text(
+                                    text = entrevista.evidencias,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
                             Spacer(modifier = Modifier.height(12.dp))
+
+
 
                             Row(
                                 modifier = Modifier.fillMaxWidth(),

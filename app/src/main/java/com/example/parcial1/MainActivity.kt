@@ -255,12 +255,14 @@ class MainActivity : ComponentActivity() {
                                             onGuardar = {
                                                     entrevistado,
                                                     fecha,
-                                                    hallazgos ->
+                                                    hallazgos,
+                                                    evidencias ->
                                                 casoLogic.insertarEntrevista(
                                                     casoId = casoSeleccionado!!.id,
                                                     entrevistado = entrevistado,
                                                     fecha = fecha,
-                                                    hallazgos = hallazgos
+                                                    hallazgos = hallazgos,
+                                                    evidencias = evidencias
                                                 )
                                                 pantallaActual = "detalle"
                                             },
@@ -286,13 +288,15 @@ class MainActivity : ComponentActivity() {
                                             onGuardar = {
                                                     entrevistado,
                                                     fecha,
-                                                    hallazgos ->
+                                                    hallazgos,
+                                                    evidencias ->
 
                                                 val entrevistaActualizada =
                                                     entrevistaSeleccionada!!.copy(
                                                         entrevistado = entrevistado,
                                                         fecha = fecha,
-                                                        hallazgos = hallazgos
+                                                        hallazgos = hallazgos,
+                                                        evidencias = evidencias
                                                     )
 
                                                 casoLogic.actualizarEntrevista(

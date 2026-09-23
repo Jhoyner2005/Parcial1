@@ -95,14 +95,16 @@ class CasoLogic(application: Application) : AndroidViewModel(application) {
         casoId: Int,
         entrevistado: String,
         fecha: String,
-        hallazgos: String
+        hallazgos: String,
+        evidencias: String
     ) {
         viewModelScope.launch {
             val entrevista = EntrevistaEntity(
                 casoId = casoId,
                 entrevistado = entrevistado,
                 fecha = fecha,
-                hallazgos = hallazgos
+                hallazgos = hallazgos,
+                evidencias = evidencias
             )
             entrevistaRepository.insertarEntrevista(entrevista)
         }
